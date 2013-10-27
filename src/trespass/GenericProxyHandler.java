@@ -12,13 +12,13 @@ import java.lang.reflect.Method;
 
 /**
  * This class implements the {@link InvocationHandler} that will be used by any dynamic
- * proxy created by {@link ProxyFactory}.
+ * proxy created by {@link Factory}.
  *
  * @param <T> The target type encapsulated by the proxy
  *
  * @author <a target="github" href="https://github.com/errodrigues">Eduardo Rodrigues</a>
  * @version $Revision$
- * @see ProxyFactory
+ * @see Factory
  */
 final class GenericProxyHandler<T> implements InvocationHandler
 {
@@ -32,6 +32,7 @@ final class GenericProxyHandler<T> implements InvocationHandler
       if (targetInstanceProvider != null)
       {
          this.targetObject = invokeInstanceProvider(targetInstanceProvider,
+        		 
                                                     instanceProviderParams);
       }
       else
@@ -40,6 +41,7 @@ final class GenericProxyHandler<T> implements InvocationHandler
       }
    }
 
+   @SuppressWarnings("unchecked")
    GenericProxyHandler(final T targetObject)
    {
       this.targetObject = targetObject;
@@ -50,7 +52,7 @@ final class GenericProxyHandler<T> implements InvocationHandler
    {
       try
       {
-         if (InternalProxy.PROXY_INST_GETTER.equals(method.getName()) && args == null)
+         if (Trespasser.PROXY_INST_GETTER.equals(method.getName()) && args == null)
          {
             return targetObject;
          }
@@ -77,10 +79,11 @@ final class GenericProxyHandler<T> implements InvocationHandler
       }
    }
 
+   @SuppressWarnings("unchecked")
    private T invokeInstanceProvider(final Method method, final Object[] args)
       throws Exception
    {
-      final Class[] paramTypes = getTargetParamTypes(method, this.getClass().getClassLoader());
+      final Class<?>[] paramTypes = getTargetParamTypes(method, this.getClass().getClassLoader());
       try
       {
          final String methodName = method.getName();
@@ -107,7 +110,7 @@ final class GenericProxyHandler<T> implements InvocationHandler
       throws Exception
    {
       final String methodName = method.getName();
-      final Class[] paramTypes = getTargetParamTypes(method, this.getClass().getClassLoader());
+      final Class<?>[] paramTypes = getTargetParamTypes(method, this.getClass().getClassLoader());
       final Method m = targetClass.getDeclaredMethod(methodName, paramTypes);
       m.setAccessible(true);
       return m.invoke(targetObject, args);
@@ -116,7 +119,7 @@ final class GenericProxyHandler<T> implements InvocationHandler
    private Object accessTargetField(final Method method, final Object[] args)
       throws Exception
    {
-      String fieldName = ProxyFactory.getProxyFieldName(method);
+      String fieldName = Factory.getProxyFieldName(method);
       Field field = null;
       try
       {
@@ -140,10 +143,10 @@ final class GenericProxyHandler<T> implements InvocationHandler
       }
    }
 
-   static Class[] getTargetParamTypes(final Method method, final ClassLoader loader)
+   static Class<?>[] getTargetParamTypes(final Method method, final ClassLoader loader)
       throws ClassNotFoundException
    {
-      final Class[] params = method.getParameterTypes();
+      final Class<?>[] params = method.getParameterTypes();
       if (params.length > 0)
       {
          final Annotation[][] casts = method.getParameterAnnotations();

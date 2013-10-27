@@ -2,7 +2,7 @@ package trespass;
 
 /**
  * This marker interface must be extended by any interface used to define
- * a dynamic proxy that can be created using the {@link ProxyFactory}.
+ * a dynamic proxy that can be created using the {@link Factory}.
  *
  * <p>Interfaces extending InternalProxy will declare method signatures that should map existing methods and/or fields
  * that are declared in a target class. Each InternalProxy interface must specify <b>one single target class</b> by annotating
@@ -26,7 +26,7 @@ package trespass;
  * @author <a target="github" href="https://github.com/errodrigues">Eduardo Rodrigues</a>
  * @version $Revision$
  */
-public interface InternalProxy<T>
+public interface Trespasser<T>
 {
    static final String PROXY_INST_GETTER = "getProxyInstance";
    

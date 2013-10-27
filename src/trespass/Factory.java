@@ -11,24 +11,26 @@ import java.util.Map;
 
 
 /**
- * Provides static factory methods to instantiate proxy objects according with properly annotated InternalProxy interfaces.
+ * Provides static factory methods to instantiate proxy objects according with properly annotated Trespasser interfaces.
  *
- * @see InternalProxy
+ * @see Trespasser
  * @see trespass.annotation
  *
  * @author <a target="github" href="https://github.com/errodrigues">Eduardo Rodrigues</a>
  * @version $Revision$
  */
-public final class ProxyFactory
+public final class Factory
 {
    private static final String REGEX_CLEAN_ARRAY_TOSTRING = "[\\Q[\\E\\Q]\\E]|class |interface ";
-   private static final Map<Class<?>, ProxyWrapper<?,? extends InternalProxy>> validProxies =
-      new HashMap<Class<?>, ProxyWrapper<?,? extends InternalProxy>>();
+   private static final Map<Class<?>, ProxyWrapper<?,? extends Trespasser<?>>> validProxies =
+      new HashMap<Class<?>, ProxyWrapper<?,? extends Trespasser<?>>>();
 
    // disallow construction
-   private ProxyFactory() {}
+   private Factory() {}
 
-   private static <T, P extends InternalProxy<T>> Class<T> validateTargetClass(final Class<P> proxy, final ClassLoader loader)
+   @SuppressWarnings("unchecked")
+   private static <T, P extends Trespasser<T>> Class<T> validateTargetClass(
+		   final Class<P> proxy, final ClassLoader loader)
       throws MissingAnnotationException, ClassNotFoundException
    {
       final ProxyClass proxyClass = proxy.getAnnotation(ProxyClass.class);
@@ -51,12 +53,14 @@ public final class ProxyFactory
       throw new IllegalArgumentException("Invalid target class");
    }
 
-   private static <T, P extends InternalProxy<T>> ProxyWrapper<T,P> validateProxyInterface(
+   private static <T, P extends Trespasser<T>> ProxyWrapper<T,P> validateProxyInterface(
       final Class<P> proxy, final ClassLoader loader)
       throws NoSuchMethodException, NoSuchFieldException, InvalidSignatureException,
              ClassNotFoundException, MissingAnnotationException
    {
+      @SuppressWarnings("unchecked")
       final Class<P> proxyClass = (Class<P>)Proxy.getProxyClass(loader, proxy);
+      @SuppressWarnings("unchecked")
       ProxyWrapper<T,P> info = (ProxyWrapper<T,P>)validProxies.get(proxyClass);
       if (info == null)
       {
@@ -66,8 +70,8 @@ public final class ProxyFactory
 
          for (Method m : proxyMethods)
          {
-            final Class[] proxyParams = m.getParameterTypes();
-            if (InternalProxy.PROXY_INST_GETTER.equals(m.getName()) && proxyParams.length == 0 && m.getReturnType().isAssignableFrom(target))
+            final Class<?>[] proxyParams = m.getParameterTypes();
+            if (Trespasser.PROXY_INST_GETTER.equals(m.getName()) && proxyParams.length == 0 && m.getReturnType().isAssignableFrom(target))
             {
                continue;
             }
@@ -93,16 +97,17 @@ public final class ProxyFactory
       return info;
    }
    
-   private static void validateProxyMethod(final Class<? extends InternalProxy> proxy,
-                                           final Method proxyMethod,
-                                           final Class[] proxyParams,
-                                           final Class<?> target,
-                                           final ClassLoader loader)
+   private static <T, P extends Trespasser<T>> void validateProxyMethod(
+		   final Class<P> proxy,
+		   final Method proxyMethod,
+		   final Class<?>[] proxyParams,
+		   final Class<?> target,
+		   final ClassLoader loader)
       throws NoSuchMethodException, NoSuchFieldException, ClassNotFoundException
    {
       try
       {
-         final Class[] paramTypes = GenericProxyHandler.getTargetParamTypes(
+         final Class<?>[] paramTypes = GenericProxyHandler.getTargetParamTypes(
             proxyMethod, loader);
          final Method m = target.getDeclaredMethod(proxyMethod.getName(), paramTypes);
          proxyMethod.getReturnType().isAssignableFrom(m.getReturnType());
@@ -123,18 +128,19 @@ public final class ProxyFactory
       }
    }
 
-   private static void validateFieldProxy(final Class<? extends InternalProxy> proxy,
-                                          final Method proxyMethod,
-                                          final Class[] proxyParams,
-                                          final Class target,
-                                          final String targetField,
-                                          final ClassLoader loader)
+   private static <T, P extends Trespasser<T>> void validateFieldProxy(
+		   final Class<P> proxy,
+		   final Method proxyMethod,
+		   final Class<?>[] proxyParams,
+		   final Class<T> target,
+		   final String targetField,
+		   final ClassLoader loader)
       throws NoSuchFieldException, InvalidSignatureException, ClassNotFoundException
    {
       try
       {
          final Field field = target.getDeclaredField(targetField);
-         final Class[] types = GenericProxyHandler.getTargetParamTypes(proxyMethod, loader);
+         final Class<?>[] types = GenericProxyHandler.getTargetParamTypes(proxyMethod, loader);
          final Class<?> result = proxyMethod.getReturnType();
          boolean valid = types.length == 1 && result != null && result.isPrimitive() &&
                          "void".equals(result.getName()) && field.getType().isAssignableFrom(types[0]);
@@ -172,12 +178,12 @@ public final class ProxyFactory
       }
    }
 
-   private static void validateProxyInstanceProvider(final Class<? extends InternalProxy> proxy,
-                                                     final Method proxyMethod,
-                                                     final Class[] proxyParams,
-                                                     final Class<?> target,
-                                                     final ClassLoader loader)
-      throws NoSuchMethodException
+   private static <T, P extends Trespasser<T>> void validateProxyInstanceProvider(
+		   final Class<P> proxy,
+		   final Method proxyMethod,
+		   final Class<?>[] proxyParams,
+		   final Class<T> target,
+		   final ClassLoader loader) throws NoSuchMethodException
    {
       try
       {
@@ -227,7 +233,7 @@ public final class ProxyFactory
     * the target class that will be encapsulated by the proxy and then used
     * as the target instance for all forwarded calls.
     */
-   public static <T, P extends InternalProxy<T>> P createProxy(
+   public static <T, P extends Trespasser<T>> P createProxy(
       final Class<P> proxyIfc, final Object... args)
    {
       return createProxy(proxyIfc, Thread.currentThread().getContextClassLoader(),
@@ -248,7 +254,7 @@ public final class ProxyFactory
     * @return A dynamic proxy that will implement the given proxy interface
     * and automatically forward calls to the target object, which will be encapsulated by the proxy.
     */
-   public static <T, P extends InternalProxy<T>> P createProxyToObject(
+   public static <T, P extends Trespasser<T>> P createProxyToObject(
       final T target, final Class<P> proxyIfc)
    {
       return createProxyToObject(target, proxyIfc, Thread.currentThread().getContextClassLoader());
@@ -265,7 +271,7 @@ public final class ProxyFactory
     * from the caller (private, package protected or protected declarations).</p>
     *
     * <p>To achieve that, the only requirement is to define an interface
-    * extending {@link InternalProxy} and declaring method signatures that
+    * extending {@link Trespasser} and declaring method signatures that
     * will match those in the target class.</p>
     *
     * <p>When the goal is to gain access to a field or constant (static or not) declared
@@ -298,12 +304,12 @@ public final class ProxyFactory
     * is defined in the interface, it will be used to obtain an instance of
     * the target class that will be encapsulated by the proxy and then used
     * as the target instance for all forwarded calls.
-    * @see InternalProxy
+    * @see Trespasser
     * @see DefaultInstanceProvider
     * @see trespass.annotation.ProxyField
     * @see trespass.annotation.Cast
     */
-   public static <T, P extends InternalProxy<T>> P createProxy(
+   public static <T, P extends Trespasser<T>> P createProxy(
       final Class<P> proxyIfc, final ClassLoader loader, final Object... args)
    {
       try
@@ -340,7 +346,7 @@ public final class ProxyFactory
     * @return A dynamic proxy that will implement the given proxy interface
     * and automatically forward calls to the target object, which will be encapsulated by the proxy.
     */
-   public static <T, P extends InternalProxy<T>> P createProxyToObject(
+   public static <T, P extends Trespasser<T>> P createProxyToObject(
       final T target, final Class<P> proxyIfc, final ClassLoader loader)
    {
       try
@@ -394,9 +400,8 @@ public final class ProxyFactory
       throw new InvalidSignatureException(msg);
    }
 
-   private static final class ProxyWrapper<T, P extends InternalProxy<T>>
+   private static final class ProxyWrapper<T, P extends Trespasser<T>>
    {
-      private final Class<P> proxyClass;
       private final Constructor<P> proxyConstructor;
       private final Class<T> targetClass;
       private final Method targetInstanceProvider;
@@ -405,7 +410,6 @@ public final class ProxyFactory
                            final Class<T> targetClass,
                            final Method instanceProvider) throws NoSuchMethodException
       {
-         this.proxyClass = proxy;
          this.proxyConstructor = proxy.getConstructor(InvocationHandler.class);
          this.targetClass = targetClass;
          this.targetInstanceProvider = instanceProvider;
@@ -417,5 +421,4 @@ public final class ProxyFactory
          return proxyConstructor.newInstance(handler);
       }
    }
-
 }

@@ -8,7 +8,9 @@ package trespass;
  */
 public final class MissingAnnotationException extends Exception
 {
-   public MissingAnnotationException(String message)
+	private static final long serialVersionUID = 1L;
+
+	public MissingAnnotationException(String message)
    {
       super(message);
    }

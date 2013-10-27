@@ -8,7 +8,9 @@ package trespass;
  */
 public final class InvalidSignatureException extends Exception
 {
-   public InvalidSignatureException(String message)
+	private static final long serialVersionUID = 1L;
+
+	public InvalidSignatureException(String message)
    {
       super(message);
    }

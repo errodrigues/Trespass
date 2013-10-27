@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * <p>This annotation will optionally mark the one method in an interface extending
- * {@link trespass.InternalProxy} that will be used to obtain the default instance
+ * {@link trespass.Trespasser} that will be used to obtain the default instance
  * of a target class.</p>
  * 
  * <p>The marked method in the proxy interface must match either a regular
@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * interface. If more than one is found, only the 1st one found will be used but
  * there will be no guarantees on the order in which method are processed.</p>
  *
- * @see trespass.ProxyFactory#createProxy
+ * @see trespass.Factory#createProxy
  *
  * @author <a target="github" href="https://github.com/errodrigues">Eduardo Rodrigues</a>
  * @version $Revision$

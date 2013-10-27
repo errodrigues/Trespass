@@ -1,4 +1,4 @@
-package trespass;
+package trespass.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -16,7 +16,7 @@ public final class ReflectionUtils {
    // disallow construction
    private ReflectionUtils() {}
 
-   public static Field getInternalField(final Class clazz, final String fieldName) {
+   public static Field getInternalField(final Class<?> clazz, final String fieldName) {
       try {
          final Field f = clazz.getDeclaredField(fieldName);
          // override its access permission so we can get its value here even if its private
@@ -28,7 +28,7 @@ public final class ReflectionUtils {
       }
    }
 
-   public static Method getInternalMethod(final Class<?> clazz, final String methodName, final Class... args) {
+   public static Method getInternalMethod(final Class<?> clazz, final String methodName, final Class<?>... args) {
       try {
          final Method m = clazz.getDeclaredMethod(methodName, args);
          // override its access permission so we can invoke it here even if its private
@@ -45,7 +45,7 @@ public final class ReflectionUtils {
    }
 
    public static <T> Constructor<T> getInternalConstructor(final Class<T> clazz,
-                                                           final Class... args) {
+                                                           final Class<?>... args) {
       try {
          final Constructor<T> c = clazz.getDeclaredConstructor(args);
          // override its access permission so we can invoke it here even if its private
@@ -56,7 +56,7 @@ public final class ReflectionUtils {
       }
    }
 
-   public static Class getClass(final String fullname) {
+   public static Class<?> getClass(final String fullname) {
       try {
          return Class.forName(fullname, false, Thread.currentThread().getContextClassLoader());
       } catch (final ClassNotFoundException ex) {
@@ -88,8 +88,8 @@ public final class ReflectionUtils {
       }
    }
 
-   public static Class[] getTypes(final Object[] args) {
-      final Class[] types = args != null ? new Class[args.length] : null;
+   public static Class<?>[] getTypes(final Object[] args) {
+      final Class<?>[] types = args != null ? new Class[args.length] : null;
       if (args != null) {
          for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();

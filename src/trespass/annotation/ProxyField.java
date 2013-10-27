@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate methods in an interface extending {@link trespass.InternalProxy} in order
+ * Annotate methods in an interface extending {@link trespass.Trespasser} in order
  * to give the method the semantics of a field accessor to the named field
  * declared in the target class
  * @author <a target="github" href="https://github.com/errodrigues">Eduardo Rodrigues</a>
