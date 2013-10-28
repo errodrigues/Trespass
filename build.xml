@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Trespass" default="build">
+
+	<property name="src" value="src" />
+	<property name="bin" value="bin" />
+	<property name="dist" value="dist" />
+	<property name="lib" value="${dist}/lib" />
+	<property name="javadoc" value="${dist}/javadoc" />
+	<property name="release" value="release" />
+
+	<target name="cleanup">
+		<delete quiet="yes">
+			<fileset dir="${bin}">
+				<include name="**/*" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="compile" description="Compile the source code">
+		<mkdir dir="${bin}" />
+		<javac srcdir="${src}"
+		       destdir="${bin}"
+		       classpath=""
+		       debug="on"
+		       failonerror="yes"
+		       includeantruntime="no"
+		       includejavaruntime="yes" />
+	</target>
+
+	<target name="pack" description="Pack the library in a Jar file">
+		<mkdir dir="${lib}" />
+		<delete>
+			<fileset dir="${lib}">
+				<include name="trespass.jar" />
+			</fileset>
+		</delete>
+
+		<jar destfile="${lib}/trespass.jar" compress="no">
+			<metainf dir="${src}/META-INF" />
+			<fileset dir="${bin}" id="id">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="javadoc" description="Generate the Javadoc">
+		<javadoc access="public"
+		         author="true"
+		         classpath="${bin}"
+		         destdir="${javadoc}"
+		         doctitle="Trespass - Runtime inspection made easy"
+		         nodeprecated="false"
+		         nodeprecatedlist="false"
+		         noindex="false"
+		         nonavbar="false"
+		         notree="false"
+		         packagenames="trespass,trespass.util,trespass.annotation"
+		         source="1.5"
+		         sourcepath="src"
+		         splitindex="true"
+		         use="true"
+		         version="true" />
+	</target>
+
+	<target name="build"
+	        depends="compile,pack"
+	        description="Complete build process" />
+
+	<target name="rebuild"
+	        depends="cleanup,compile,pack"
+	        description="Complete build process, starting with a cleanup" />
+
+	<target name="release" depends="rebuild,javadoc">
+		<mkdir dir="${release}" />
+		<delete>
+			<fileset dir="${release}">
+				<include name="trespass.zip" />
+			</fileset>
+		</delete>
+		<zip destfile="${release}/trespass.zip"
+		     whenempty="fail"
+		     compress="true">
+			<zipfileset dir="." includes="${dist}/**,${src}/**" />
+			<zipfileset file="build.xml" />
+			<zipfileset file="README.md" />
+		</zip>
+	</target>
+
+</project>
